@@ -15,13 +15,11 @@
             --text-light: #b8b0e0;
             --success: #4ade80;
         }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #0f0b1f 0%, #1a1433 100%);
@@ -29,12 +27,10 @@
             min-height: 100vh;
             line-height: 1.6;
         }
-
         header {
             text-align: center;
             padding: 2.5rem 1rem 2rem;
         }
-
         h1 {
             font-size: 3rem;
             font-weight: 700;
@@ -43,12 +39,10 @@
             -webkit-text-fill-color: transparent;
             margin-bottom: 0.5rem;
         }
-
         header p {
             color: var(--text-light);
             font-size: 1.1rem;
         }
-
         main {
             max-width: 800px;
             margin: 0 auto;
@@ -56,7 +50,6 @@
             display: grid;
             gap: 1.5rem;
         }
-
         section {
             background: var(--card);
             border-radius: 20px;
@@ -64,7 +57,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(123, 94, 255, 0.1);
         }
-
         h2 {
             font-size: 1.5rem;
             margin-bottom: 1.2rem;
@@ -77,7 +69,6 @@
             gap: 12px;
             margin-bottom: 1.5rem;
         }
-
         input {
             flex: 1;
             padding: 14px 18px;
@@ -87,12 +78,10 @@
             color: white;
             font-size: 1rem;
         }
-
         input:focus {
             outline: none;
             box-shadow: 0 0 0 3px rgba(123, 94, 255, 0.3);
         }
-
         button {
             padding: 14px 24px;
             background: var(--primary);
@@ -103,7 +92,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         button:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
@@ -111,8 +99,8 @@
 
         #goal-list {
             list-style: none;
+            padding: 0;
         }
-
         .goal-item {
             display: flex;
             align-items: center;
@@ -123,24 +111,20 @@
             margin-bottom: 10px;
             transition: all 0.3s;
         }
-
         .goal-item.completed {
             opacity: 0.7;
             text-decoration: line-through;
         }
-
         .goal-item input[type="checkbox"] {
             width: 22px;
             height: 22px;
             accent-color: var(--success);
             cursor: pointer;
         }
-
         .goal-text {
             flex: 1;
             font-size: 1.05rem;
         }
-
         .delete-btn {
             background: transparent;
             color: #ff6b6b;
@@ -152,7 +136,6 @@
             justify-content: center;
             border-radius: 50%;
         }
-
         .delete-btn:hover {
             background: rgba(255, 107, 107, 0.15);
         }
@@ -163,14 +146,12 @@
             margin-bottom: 12px;
             font-weight: 500;
         }
-
         .progress-bar {
             height: 12px;
             background: rgba(255,255,255,0.1);
             border-radius: 999px;
             overflow: hidden;
         }
-
         #progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #7b5eff, #a78bff);
@@ -255,7 +236,6 @@
             const savedGoals = localStorage.getItem('glowUpGoals');
             if (savedGoals) {
                 goals = JSON.parse(savedGoals);
-                renderGoals();
             }
         }
 
@@ -268,7 +248,6 @@
         function addGoal() {
             const input = document.getElementById('goal-input');
             const text = input.value.trim();
-
             if (text === '') return;
 
             goals.push({
@@ -284,7 +263,7 @@
 
         // Отметка выполнения
         function toggleGoal(id) {
-            goals = goals.map(goal => 
+            goals = goals.map(goal =>
                 goal.id === id ? {...goal, completed: !goal.completed} : goal
             );
             renderGoals();
@@ -293,9 +272,11 @@
 
         // Удаление цели
         function deleteGoal(id) {
-            goals = goals.filter(goal => goal.id !== id);
-            renderGoals();
-            saveGoals();
+            if (confirm('Удалить эту цель?')) {
+                goals = goals.filter(goal => goal.id !== id);
+                renderGoals();
+                saveGoals();
+            }
         }
 
         // Рендер списка целей
@@ -318,9 +299,11 @@
                     <button class="delete-btn" title="Удалить">×</button>
                 `;
 
-                // Обработчики
                 li.querySelector('input').addEventListener('change', () => toggleGoal(goal.id));
-                li.querySelector('.delete-btn').addEventListener('click', () => deleteGoal(goal.id));
+                li.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteGoal(goal.id);
+                });
 
                 list.appendChild(li);
             });
@@ -332,8 +315,8 @@
         function updateProgress() {
             const total = goals.length;
             const completed = goals.filter(g => g.completed).length;
-            
-            document.getElementById('stats-info').textContent = 
+           
+            document.getElementById('stats-info').textContent =
                 `${completed} выполнено из ${total}`;
 
             const percentage = total ? Math.round((completed / total) * 100) : 0;
@@ -348,20 +331,16 @@
 
         // Инициализация
         function init() {
-            // Обработчики кнопок
             document.getElementById('add-btn').addEventListener('click', addGoal);
             
-            // Добавление по Enter
             document.getElementById('goal-input').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') addGoal();
             });
 
             document.getElementById('new-challenge-btn').addEventListener('click', newChallenge);
 
-            // Загрузка сохранённых целей
             loadGoals();
-
-            // Первый случайный челлендж
+            renderGoals();        // важно добавить!
             newChallenge();
         }
 
